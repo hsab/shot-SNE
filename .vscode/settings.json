@@ -1,0 +1,16 @@
+{
+    "C_Cpp.intelliSenseEngineFallback": "Enabled",
+    "files.exclude":{
+        "**/.readme": true,
+        "**/.directory": true,
+        "**/.appveyor.yml": true,
+        "**/.gitignore": true,
+        "**/.travis.yml": true
+    },
+    "spellright.language": "English (American)",
+    "spellright.documentTypes": [
+        "markdown",
+        "latex",
+        "plaintext"
+    ]
+}

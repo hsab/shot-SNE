@@ -12,5 +12,12 @@
         "markdown",
         "latex",
         "plaintext"
-    ]
+    ],
+    "files.associations": {
+        "iostream": "cpp",
+        "bitset": "cpp",
+        "typeinfo": "cpp",
+        "condition_variable": "cpp",
+        "mutex": "cpp"
+    }
 }

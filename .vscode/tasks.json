@@ -9,12 +9,12 @@
             "label": "Build Debug",
             "presentation": {
                 "reveal": "always",
-                "panel": "new"
+                "panel": "shared"
             },
-            "command": "make",
+            "command": "bash",
             "args": [
-                "Debug",
-                "-j24"
+                "-c",
+                "time ( rm -f ./bin/$(basename '$PWD')_debug && make Debug -j$(nproc) )"
             ],
             "group": {
                 "kind": "build",
@@ -29,20 +29,20 @@
             "label": "Build Release",
             "presentation": {
                 "reveal": "always",
-                "panel": "new"
+                "panel": "shared"
             },
-            "command": "make",
+            "command": "bash",
             "args": [
-                "Release",
-                "-j24"
-            ]
+                "-c",
+                "time ( rm -f ./bin/$(basename '$PWD') && make Release -j$(nproc)"
+            ],
         },
         {
             "type": "shell",
             "label": "Clean Debug",
             "presentation": {
                 "reveal": "always",
-                "panel": "new"
+                "panel": "shared"
             },
             "command": "make",
             "args": [
@@ -54,7 +54,7 @@
             "label": "Clean Release",
             "presentation": {
                 "reveal": "always",
-                "panel": "new"
+                "panel": "shared"
             },
             "command": "make",
             "args": [
@@ -66,7 +66,7 @@
             "label": "Run Debug",
             "presentation": {
                 "reveal": "never",
-                "panel": "new"
+                "panel": "shared"
             },
             "command": "make",
             "args": [
@@ -78,7 +78,7 @@
             "label": "Run Release",
             "presentation": {
                 "reveal": "never",
-                "panel": "new"
+                "panel": "shared"
             },
             "command": "make",
             "args": [
@@ -90,7 +90,7 @@
             "label": "Clean All",
             "presentation": {
                 "reveal": "always",
-                "panel": "new"
+                "panel": "shared"
             },
             "command": "make",
             "args": [
@@ -106,7 +106,7 @@
             "label": "Check Paths",
             "presentation": {
                 "reveal": "always",
-                "panel": "new"
+                "panel": "shared"
             },
             "command": "sh ${workspaceRoot}/.vscode/testDirs.sh ${workspaceRoot} ${workspaceFolder}"
         }

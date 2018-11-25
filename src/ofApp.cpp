@@ -1,82 +1,93 @@
 #include "ofApp.h"
 
 //--------------------------------------------------------------
-void ofApp::setup(){
+void ofApp::setup()
+{
+    myvid.setup();
+    doLock = false;
+}
 
-    // About Auto complete
-    // Curretry vscode intelisense for C++ has limitation.
-    // Try to type m.set and you will see tons of functions and variables includes "set" keyword
-    // 
-    // more info here https://github.com/Microsoft/vscode-cpptools/issues/13
-    // You can use "Peek Definition" feature instead
-    MyClass m;
-    // m.set
+void ofApp::exit()
+{
+    // threadedObject.stop();
+    // threadedObject2.stop();
+}
+
+// string test = ofSystem(cmd.c_str());
+
+//--------------------------------------------------------------
+void ofApp::update()
+{
+    myvid.update();
+    // threadedObject.updateNoLock();
+    // threadedObject2.updateNoLock();
 }
 
 //--------------------------------------------------------------
-void ofApp::update(){
-
+void ofApp::draw()
+{
+    myvid.draw();
+    // threadedObject.draw();
 }
 
 //--------------------------------------------------------------
-void ofApp::draw(){
-
-    ofBackground(20,200,100);
-    ofSetColor(255);
-    ofDrawRectangle(100,100,100,100);
+void ofApp::keyPressed(int key)
+{
+    if (key == ' ') {
+        string dataPath = ofFilePath::getAbsolutePath(ofToDataPath(""));
+        string cmd = dataPath + "/bin/hecate -i " + dataPath + "foo.mp4" + " --print_shot_info  --print_keyfrm_info";
+        string cmd2 = dataPath + "/bin/hecate -i " + dataPath + "foo2.mp4" + " --print_shot_info  --print_keyfrm_info";
+        myvid.hecate(cmd);
+        // threadedObject2.setup(cmd2);
+    }
 }
 
 //--------------------------------------------------------------
-void ofApp::keyPressed(int key){
-
+void ofApp::keyReleased(int key)
+{
 }
 
 //--------------------------------------------------------------
-void ofApp::keyReleased(int key){
-
+void ofApp::mouseMoved(int x, int y)
+{
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseMoved(int x, int y){
-
+void ofApp::mouseDragged(int x, int y, int button)
+{
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button){
-
+void ofApp::mousePressed(int x, int y, int button)
+{
 }
 
 //--------------------------------------------------------------
-void ofApp::mousePressed(int x, int y, int button){
-
+void ofApp::mouseReleased(int x, int y, int button)
+{
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseReleased(int x, int y, int button){
-
+void ofApp::mouseEntered(int x, int y)
+{
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseEntered(int x, int y){
-
+void ofApp::mouseExited(int x, int y)
+{
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseExited(int x, int y){
-
+void ofApp::windowResized(int w, int h)
+{
 }
 
 //--------------------------------------------------------------
-void ofApp::windowResized(int w, int h){
-
+void ofApp::gotMessage(ofMessage msg)
+{
 }
 
 //--------------------------------------------------------------
-void ofApp::gotMessage(ofMessage msg){
-
-}
-
-//--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo){ 
-
+void ofApp::dragEvent(ofDragInfo dragInfo)
+{
 }

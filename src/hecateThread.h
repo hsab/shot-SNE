@@ -4,9 +4,9 @@
 #include "hecateEvent.h"
 #include "ofMain.h"
 
-class ThreadedObject : public ofThread {
+class HecateThread : public ofThread {
  public:
-  ~ThreadedObject() {
+  ~HecateThread() {
     stop();
     waitForThread(false);
   }

@@ -2,7 +2,7 @@
 
 Vid::Vid() {}
 
-Vid::~Vid() { threadedObject.stop(); }
+Vid::~Vid() { hecateThread.stop(); }
 
 void Vid::setup() {
   x = ofRandom(0, ofGetWidth());  // give some random positioning
@@ -37,18 +37,16 @@ void Vid::update() {
   x += speedX;
   y += speedY;
 
-  if (threadedObject.isProcessed() & threadedObject.isThreadRunning())
-    threadedObject.stop();
+  if (hecateThread.isProcessed() & hecateThread.isThreadRunning())
+    hecateThread.stop();
 }
 
 void Vid::draw() {
   ofSetColor(color);
   ofDrawCircle(x, y, dim);
-
-  // threadedObject.draw();
 }
 
-void Vid::hecate(string cmd) { threadedObject.setup(cmd); }
+void Vid::hecate(string cmd) { hecateThread.setup(cmd); }
 
 void Vid::hecateEvent(HecateEvent &e) {
   color.set(255);

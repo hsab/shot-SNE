@@ -6,25 +6,15 @@ void ofApp::setup() {
   doLock = false;
 }
 
-void ofApp::exit() {
-  // threadedObject.stop();
-  // threadedObject2.stop();
-}
+void ofApp::exit() {}
 
 // string test = ofSystem(cmd.c_str());
 
 //--------------------------------------------------------------
-void ofApp::update() {
-  myvid.update();
-  // threadedObject.updateNoLock();
-  // threadedObject2.updateNoLock();
-}
+void ofApp::update() { myvid.update(); }
 
 //--------------------------------------------------------------
-void ofApp::draw() {
-  myvid.draw();
-  // threadedObject.draw();
-}
+void ofApp::draw() { myvid.draw(); }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
@@ -36,7 +26,6 @@ void ofApp::keyPressed(int key) {
     string cmd2 = dataPath + "/bin/hecate -i " + dataPath + "foo2.mp4" +
                   " --print_shot_info  --print_keyfrm_info";
     myvid.hecate(cmd);
-    // threadedObject2.setup(cmd2);
   }
 }
 

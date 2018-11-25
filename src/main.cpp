@@ -1,8 +1,7 @@
-#include "ofMain.h"
 #include "ofApp.h"
+#include "ofMain.h"
 
-int main()
-{
+int main() {
 
 #if defined(TARGET_OPENGLES)
   ofGLESWindowSettings settings;
@@ -13,7 +12,5 @@ int main()
   ofSetupOpenGL(1280, 720, OF_WINDOW);
 #endif
 
-ofRunApp( new ofApp());
-
+  ofRunApp(new ofApp());
 }
-

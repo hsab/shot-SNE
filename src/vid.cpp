@@ -43,7 +43,8 @@ void Vid::update()
     x += speedX;
     y += speedY;
 
-    threadedObject.updateNoLock();
+    if (threadedObject.getProcessed() & threadedObject.isThreadRunning())
+        threadedObject.stop();
 }
 
 void Vid::draw()

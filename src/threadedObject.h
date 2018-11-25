@@ -43,7 +43,10 @@ public:
     /// stop and notify here once the condition is waiting
     void stop()
     {
-        system("killall hecate");
+        if (!getProcessed())
+            system("killall hecate");
+        isProcessing = false;
+        processed = false;
         std::unique_lock<std::mutex> lck(mutex);
         stopThread();
         condition.notify_all();

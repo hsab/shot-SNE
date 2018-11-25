@@ -2,7 +2,10 @@
 
 //--------------------------------------------------------------
 void ofApp::setup() {
-  myvid.setup();
+  dataPath = ofToDataPath("", true);
+  hecatePath = ofToDataPath("", true) + "/bin/hecate";
+
+  myvid.setup(dataPath + "/foo.mp4");
   doLock = false;
 }
 
@@ -20,12 +23,7 @@ void ofApp::draw() { myvid.draw(); }
 void ofApp::keyPressed(int key) {
   if (key == ' ') {
     myvid.color.set(0);
-    string dataPath = ofFilePath::getAbsolutePath(ofToDataPath(""));
-    string cmd = dataPath + "/bin/hecate -i " + dataPath + "foo.mp4" +
-                 " --print_shot_info  --print_keyfrm_info";
-    string cmd2 = dataPath + "/bin/hecate -i " + dataPath + "foo2.mp4" +
-                  " --print_shot_info  --print_keyfrm_info";
-    myvid.hecate(cmd);
+    myvid.hecate(hecatePath);
   }
 }
 

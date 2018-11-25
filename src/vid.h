@@ -8,7 +8,8 @@
 class Vid {
  public:  // place public functions or variables declarations here
   // methods, equivalent to specific functions of your class objects
-  void setup();  // setup method, use this to setup your object's initial state
+  void setup(string path);  // setup method, use this to setup your object's
+                            // initial state
 
   void update();  // update method, used to refresh your objects properties
   void draw();    // draw method, this where you'll do the object's drawing
@@ -22,7 +23,9 @@ class Vid {
   int dim;        // size
   ofColor color;  // color using ofColor type
   HecateThread hecateThread;
-  string metadata;
+  string filePath;
+  vector<tuple<int, int>> shots;
+  vector<int> keyframes;
 
   void hecateEvent(HecateEvent &e);
 

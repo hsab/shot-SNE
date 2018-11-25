@@ -4,7 +4,8 @@ Vid::Vid() {}
 
 Vid::~Vid() { hecateThread.stop(); }
 
-void Vid::setup() {
+void Vid::setup(string path) {
+  filePath = path;
   x = ofRandom(0, ofGetWidth());  // give some random positioning
   y = ofRandom(0, ofGetHeight());
 
@@ -46,7 +47,11 @@ void Vid::draw() {
   ofDrawCircle(x, y, dim);
 }
 
-void Vid::hecate(string cmd) { hecateThread.setup(cmd); }
+void Vid::hecate(string hecatePath) {
+  string cmd = hecatePath + " -i " + filePath +
+               " --print_shot_info  --print_keyfrm_info";
+  hecateThread.setup(cmd);
+}
 
 void Vid::hecateEvent(HecateEvent &e) {
   color.set(255);

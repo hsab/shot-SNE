@@ -5,8 +5,7 @@
 #include "vid.h"
 
 class ofApp : public ofBaseApp {
-
-public:
+ public:
   void setup();
   void update();
   void draw();
@@ -26,4 +25,6 @@ public:
 
   Vid myvid;
   bool doLock;
+  string hecatePath;
+  string dataPath;
 };

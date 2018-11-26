@@ -3,6 +3,7 @@
 
 class HecateEvent : public ofEventArgs {
  public:
+  bool terminated = false;
   string path;
   string raw;
   string cmd;

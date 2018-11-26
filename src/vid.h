@@ -1,38 +1,52 @@
-#ifndef _VID  // if this class hasn't been defined, the program can define it
-#define _VID  // by using this if statement you prevent the class to be called
-              // more than once which would confuse the compiler
+#ifndef _VID
+#define _VID
 #include "hecateEvent.h"
 #include "hecateThread.h"
-#include "ofMain.h"  // we need to include this to have a reference to the openFrameworks framework
+#include "ofMain.h"
 
 class Vid {
- public:  // place public functions or variables declarations here
-  // methods, equivalent to specific functions of your class objects
-  void setup(string path);  // setup method, use this to setup your object's
-                            // initial state
+ public:
+  void setup(string file, string *hecate);
+  //   void setup(string file);
 
-  void update();  // update method, used to refresh your objects properties
-  void draw();    // draw method, this where you'll do the object's drawing
+  void update();
+  void draw();
   void hecate(string);
+  void hecateClose();
+  void closeVideo();
+  void openVideo();
+  int vidStat();
+  //   bool ready();
+  void play();
+  void stop();
+  void setViewed(bool flag);
+  bool isViewed();
 
-  // variables
-  float x;  // position
+  float x;
   float y;
-  float speedY;  // speed and direction
+  float speedY;
   float speedX;
-  int dim;        // size
-  ofColor color;  // color using ofColor type
-  HecateThread hecateThread;
-  string filePath;
+  int dim;
+  ofColor color;
+
+  HecateThread *hecateThread = nullptr;
+
+  string *hecatePath;
+  ofParameter<string> filePath;
+  ofParameter<bool> inView;
+  ofParameter<int> currentFrame;
+  ofVideoPlayer video;
+
   vector<tuple<int, int>> shots;
   vector<int> keyframes;
 
   void hecateEvent(HecateEvent &e);
+  void keyPressed(ofKeyEventArgs &e);
+  void keyPressed(int key);
 
-  Vid();  // constructor - used to initialize an object, if no properties are
-          // passed the program sets them to the default value
+  Vid();
   ~Vid();
 
- private:  // place private functions or variables declarations here
-};         // don't forget the semicolon!
+ private:
+};
 #endif

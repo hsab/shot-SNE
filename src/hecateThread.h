@@ -11,22 +11,47 @@ class HecateThread : public ofThread {
     waitForThread(false);
   }
 
-  void setup(string command) {
+  void hecateLog(string title, bool info) {
+    if (info) {
+      cout << logPrefix << title << endl;
+      cout << logPrefix << "Hecate: " << hecateBin.path() << endl;
+      cout << logPrefix << "File:   " << file.path() << endl;
+      cout << logPrefix << "Name:   " << file.getFileName() << endl << endl;
+    }
+
+    else {
+      cout << logPrefix << title << " [ " << file.getFileName() << " ]" << endl
+           << endl;
+    }
+  }
+
+  void setup(string hecatePath, string filePath) {
     if (processing == false) {
-      cmd = command;
-      start();
+      cmd = hecatePath + " -i " + filePath +
+            " --print_shot_info  --print_keyfrm_info";
+      file = ofFile(filePath);
+      hecateBin = ofFile(hecatePath);
+
+      if (hecateBin.doesFileExist(hecatePath)) {
+        hecateLog("INITIATED", true);
+        start();
+      }
     }
   }
 
   void start() { startThread(); }
 
   void stop() {
-    if (processed == false && processing == true) system("killall hecate");
+    if (processed == false && processing == true) {
+      system("killall hecate");
+      hecateLog("PROCESS KILLED", true);
+    }
 
     processing = false;
     processed = false;
-    std::unique_lock<std::mutex> lck(mutex);
     stopThread();
+    hecateLog("THREAD STOPPED", false);
+    std::unique_lock<std::mutex> lck(mutex);
     condition.notify_all();
   }
 
@@ -52,7 +77,12 @@ class HecateThread : public ofThread {
     while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
       result += buffer.data();
 
-    emitEvent(result);
+    processing = false;
+
+    if (result != "") {
+      emitEvent(result);
+      hecateLog("Hecate Analysis Complete", false);
+    }
   }
 
   void emitEvent(string result) {
@@ -124,6 +154,9 @@ class HecateThread : public ofThread {
   string cmd;
   bool processing = false;
   bool processed = false;
+  ofFile file;
+  ofFile hecateBin;
+  string logPrefix = "[HECATE] ";
 
   std::condition_variable condition;
   int threadFrameNum = 0;

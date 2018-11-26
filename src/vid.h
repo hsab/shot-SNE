@@ -7,9 +7,6 @@
 struct VidStat {
   bool closed = true;
   bool stopped = true;
-  int playerWidth = -1;
-  int playerHeight = -1;
-  int playerFrames = -1;
   int width = -1;
   int height = -1;
   int frames = -1;
@@ -18,6 +15,7 @@ struct VidStat {
   float currentTime = -1;
   float position = -1.0;
   float fps = -1.0;
+  int keyframeIndex = -1.0;
 
   string toString() {
     std::ostringstream stream_out;
@@ -26,7 +24,8 @@ struct VidStat {
                << "\nFrames: " << frames << "\nDuration: " << duration
                << "\nCurrent Frame: " << currentFrame
                << "\nCurrent Time: " << currentTime
-               << "\nPosition: " << position << "\nFPS: " << fps << endl;
+               << "\nPosition: " << position << "\nFPS: " << fps
+               << "\nKeyframe Index: " << keyframeIndex << endl;
     return stream_out.str();
   };
 
@@ -74,6 +73,13 @@ class Vid {
   void initStats();
   void setViewed(bool flag);
   bool isViewed();
+  void alignIndexToFrame(char flag);
+  void nextKeyframe();
+  void previousKeyframe();
+  void prepareFrameByFrame();
+  void renderCurrentFrame();
+  void renderKeyframes();
+  bool isReadyForKeyframeNavigation();
 
   float x;
   float y;
@@ -87,6 +93,8 @@ class Vid {
   string *hecatePath;
   ofParameter<string> filePath;
   ofParameter<bool> inView;
+  ofParameter<bool> frameByframe;
+  ofParameter<bool> hecateDone;
   ofParameter<int> currentFrame;
   ofVideoPlayer video;
   VidStat stats;
@@ -94,12 +102,19 @@ class Vid {
   vector<tuple<int, int>> shots;
   vector<int> keyframes;
 
+  int keyframeIndex = -1;
+
   void hecateEvent(HecateEvent &e);
   void keyPressed(ofKeyEventArgs &e);
   void keyPressed(int key);
 
   Vid();
   ~Vid();
+
+  int width = 500;
+  int height = 300;
+  ofFbo frameBuffer;
+  string renderFolder;
 
  private:
 };

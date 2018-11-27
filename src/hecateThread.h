@@ -16,7 +16,8 @@ class HecateThread : public ofThread {
       cout << logPrefix << title << endl;
       cout << logPrefix << "Hecate: " << hecateBin.path() << endl;
       cout << logPrefix << "File:   " << file.path() << endl;
-      cout << logPrefix << "Name:   " << file.getFileName() << endl << endl;
+      cout << logPrefix << "Name:   " << file.getFileName() << endl
+           << endl;
     }
 
     else {
@@ -28,8 +29,8 @@ class HecateThread : public ofThread {
   void setup(string hecatePath, string filePath) {
     if (processing == false) {
       cmd = hecatePath + " -i " + filePath +
-            " --print_shot_info  --print_keyfrm_info";
-      file = ofFile(filePath);
+          " --print_shot_info  --print_keyfrm_info";
+      file      = ofFile(filePath);
       hecateBin = ofFile(hecatePath);
 
       if (hecateBin.doesFileExist(hecatePath)) {
@@ -48,7 +49,7 @@ class HecateThread : public ofThread {
     }
 
     processing = false;
-    processed = false;
+    processed  = false;
     stopThread();
     hecateLog("THREAD STOPPED", false);
     std::unique_lock<std::mutex> lck(mutex);
@@ -69,11 +70,12 @@ class HecateThread : public ofThread {
     }
   }
 
-  void exec(const char *command) {
+  void exec(const char* command) {
     std::array<char, 128> buffer;
     std::string result;
     std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command, "r"), pclose);
-    if (!pipe) throw std::runtime_error("popen() failed!");
+    if (!pipe)
+      throw std::runtime_error("popen() failed!");
     while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
       result += buffer.data();
 
@@ -88,45 +90,6 @@ class HecateThread : public ofThread {
   void emitEvent(string result) {
     static HecateEvent newEvent;
     newEvent.raw = result;
-
-    // Remove Hecate header info
-    vector<string> clean = ofSplitString(result, "shots:");
-    clean = ofSplitString(clean[1], "keyframes:");
-
-    // Clean shots' brackets
-    ofStringReplace(clean[0], "[", "");
-    ofStringReplace(clean[0], "]", "");
-    // Clean keyframes' brackets
-    ofStringReplace(clean[1], "[", "");
-    ofStringReplace(clean[1], "]", "");
-
-    // Prepare shots
-    vector<tuple<int, int>> shots;
-
-    vector<string> temp;
-    vector<string> temp2;
-    temp = ofSplitString(clean[0], ",");
-    for (auto s : temp) {
-      temp2 = ofSplitString(s, ":");
-      shots.push_back(make_tuple(stoi(temp2[0]), stoi(temp2[1])));
-    }
-
-    newEvent.shots = shots;
-
-    // Prepare keyframes
-    vector<int> keyframes;
-    stringstream ssk(clean[1]);
-
-    int i = 0;
-    while (ssk >> i) {
-      keyframes.push_back(i);
-
-      if (ssk.peek() == ',' || ssk.peek() == ' ') {
-        ssk.ignore();
-      }
-    }
-
-    newEvent.keyframes = keyframes;
     newEvent.cmd = cmd;
 
     ofNotifyEvent(HecateEvent::events, newEvent);
@@ -153,7 +116,7 @@ class HecateThread : public ofThread {
  protected:
   string cmd;
   bool processing = false;
-  bool processed = false;
+  bool processed  = false;
   ofFile file;
   ofFile hecateBin;
   string logPrefix = "[HECATE] ";

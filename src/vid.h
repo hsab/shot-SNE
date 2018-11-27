@@ -119,8 +119,12 @@ class Vid {
   Vid();
   ~Vid();
 
-  int width  = 500;
-  int height = 300;
+  int width;
+  int height;
+  int wn, hn, top, left;
+  void setupCoordinates(int w, int h);
+  void calculateCoordinates(int width, int height);
+
   ofFbo frameBuffer;
   string renderFolder;
 

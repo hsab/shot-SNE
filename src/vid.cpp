@@ -21,6 +21,11 @@ void Vid::setup(string file, string* hecate) {
   // ofAddListener(ofEvents().keyPressed, this, &Vid::keyPressed);
 }
 
+void Vid::setupCoordinates(int w, int h) {
+  width  = w;
+  height = h;
+}
+
 bool Vid::prepareDataFolder(bool readIfExists) {
   baseName               = ofFilePath::getBaseName(filePath.get());
   enclosingDirectoryPath = ofFilePath::getEnclosingDirectory(filePath.get(), false);
@@ -100,6 +105,7 @@ void Vid::updateStats() {
   if (!stats.closed) {
     stats.updateDimension(video.getWidth(), video.getHeight());
     stats.updateTotalFrames(video.getTotalNumFrames());
+    calculateCoordinates(width, height);
     if (!stats.stopped) {
       stats.updateDuration(video.getDuration());
       stats.updateCurrentTimeInfo(video.getPosition());
@@ -278,9 +284,56 @@ void Vid::update() {
   updateStats();
 }
 
+void Vid::calculateCoordinates(int w, int h) {
+  int wv   = stats.width;
+  int hv   = stats.height;
+  float rv = wv / hv;
+  float r  = w / h;
+
+  wn = r > rv ? (wv * h / hv) : (w);
+  hn = r > rv ? (h) : (hv * w / wv);
+
+  left = (ofGetWidth() - wn) / 2;
+  top  = (ofGetHeight() - hn) / 2;
+}
+
 void Vid::draw() {
-  if (inView)
-    video.draw(20, 20, width, height);
+  if (inView) {
+    ofSetHexColor(0xffffff);
+    video.draw(left, top, wn, hn);
+
+    int tlh = 50;
+    int tlo = 20;
+
+    if (video.isPlaying()) {
+      ofSetHexColor(0x222222);
+
+      ofDrawCircle(left, top + hn + (tlh / 2) + tlo, 5);
+      ofDrawCircle(left + wn, top + hn + (tlh / 2) + tlo, 5);
+
+      ofEnableAlphaBlending();
+      ofSetColor(255, 255, 255, 150);
+      ofSetLineWidth(1.0f);
+      float x, y, x2;
+      y = top + hn + tlo;
+      for (auto key : keyframes) {
+        x = ((float)key / (float)stats.frames) * wn + left;
+        ofDrawLine(x, y, x, y + tlh);
+      }
+      ofDisableAlphaBlending();
+
+      for (auto key : shots) {
+        x  = ((float)get<0>(key) / (float)stats.frames) * wn + left;
+        x2 = ((float)get<1>(key) / (float)stats.frames) * wn + left;
+        ofDrawRectangle(x, top + hn + tlo + (tlh / 4), x2 - x, tlh / 2);
+      }
+
+      ofSetColor(255, 0, 0, 0);
+      ofSetLineWidth(2.0f);
+      x = (video.getCurrentFrame() / (float)stats.frames) * wn + left;
+      ofDrawLine(x, y, x, y + 50);
+    }
+  }
 }
 
 void Vid::keyPressed(ofKeyEventArgs& e) {}

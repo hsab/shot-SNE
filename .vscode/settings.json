@@ -7,7 +7,9 @@
         "**/.gitignore": true,
         "**/.travis.yml": true
     },
-    "spellright.language": "English (American)",
+    "spellright.language": [
+        "English (American)"
+    ],
     "spellright.documentTypes": [
         "markdown",
         "latex",

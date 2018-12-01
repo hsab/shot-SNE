@@ -3,6 +3,8 @@
 #include "hecateEvent.h"
 #include "hecateThread.h"
 #include "ofMain.h"
+#include "ofxCv.h"
+#include "ofxGui.h"
 
 struct VidStat {
   bool closed       = true;
@@ -77,11 +79,14 @@ class Vid {
   void nextKeyframe();
   void previousKeyframe();
   void prepareFrameByFrame();
+  void prepareBuffer();
+  void updateBuffer();
   void renderCurrentFrame();
   void renderKeyframes();
   bool isReadyForKeyframeNavigation();
   void processHecateResults(string result);
   bool prepareDataFolder(bool readIfExists);
+  void processRendersFolder(bool hecateOutputExists);
   void prepareHecateOutput();
 
   HecateThread* hecateThread = nullptr;
@@ -109,12 +114,15 @@ class Vid {
 
   vector<tuple<int, int>> shots;
   vector<int> keyframes;
+  map<int, bool> keyframesMap;
+  map<int, int> keyframesToShotsMap;
 
   int keyframeIndex = -1;
 
   void hecateEvent(HecateEvent& e);
   void keyPressed(ofKeyEventArgs& e);
   void keyPressed(int key);
+  void mouseDragged(int x, int y, int button);
 
   Vid();
   ~Vid();
@@ -122,11 +130,22 @@ class Vid {
   int width;
   int height;
   int wn, hn, top, left;
+  int fboWidth, fboHeight, fboLeft, fboTop;
+  int tlh = 50;
+  int tlo = 20;
+
   void setupCoordinates(int w, int h);
-  void calculateCoordinates(int width, int height);
+  void calculateCoordinates(int w, int h, int& wn, int& hn, int& left, int& top);
 
   ofFbo frameBuffer;
+  ofImage saveImage;
+  ofxCv::ContourFinder contourFinder;
+  ofxPanel gui;
+  ofParameter<float> minArea, maxArea, threshold;
+  ofParameter<bool> holes;
   string renderFolder;
+
+  ofTrueTypeFont verdana14;
 
  private:
 };

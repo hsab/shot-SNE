@@ -23,7 +23,9 @@ class ofApp : public ofBaseApp {
   void dragEvent(ofDragInfo dragInfo);
   void gotMessage(ofMessage msg);
 
-  Vid myvid;
+  // Vid myvid;
+  vector<std::shared_ptr<Vid>> videos;
+  int videoIndex = 0;
   bool doLock;
   string hecatePath;
   string dataPath;

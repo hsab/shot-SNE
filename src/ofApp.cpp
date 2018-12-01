@@ -7,10 +7,15 @@ void ofApp::setup() {
   dataPath   = ofToDataPath("", true);
   hecatePath = ofToDataPath("", true) + "/bin/hecate";
 
-  myvid.setup(dataPath + "/foo.mp4", &hecatePath);
-  myvid.setupCoordinates(600, 300);
-  myvid.openVideo();
-  doLock = false;
+  std::shared_ptr<Vid> myvid(new Vid);
+  myvid->setup(dataPath + "/foo.mp4", &hecatePath);
+  myvid->setupCoordinates(900, 900);
+  videos.push_back(myvid);
+
+  std::shared_ptr<Vid> myvid2(new Vid);
+  myvid2->setup(dataPath + "/foo2.mp4", &hecatePath);
+  myvid2->setupCoordinates(900, 900);
+  videos.push_back(myvid2);
 }
 
 void ofApp::exit() {}
@@ -19,17 +24,28 @@ void ofApp::exit() {}
 
 //--------------------------------------------------------------
 void ofApp::update() {
-  myvid.update();
+  std::stringstream strm;
+  strm << "fps: " << ofGetFrameRate();
+  ofSetWindowTitle(strm.str());
+
+  videos[videoIndex]->update();
 }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-  myvid.draw();
+  // videos[videoIndex]video.draw(0, 0);
+  videos[videoIndex]->draw();
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
-  myvid.keyPressed(key);
+  int val = key - '0';
+  if (val >= 0 && val < videos.size()) {
+    videos[videoIndex]->closeVideo();
+    videoIndex = val;
+  }
+
+  videos[videoIndex]->keyPressed(key);
 }
 
 //--------------------------------------------------------------
@@ -39,7 +55,9 @@ void ofApp::keyReleased(int key) {}
 void ofApp::mouseMoved(int x, int y) {}
 
 //--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button) {}
+void ofApp::mouseDragged(int x, int y, int button) {
+  videos[videoIndex]->mouseDragged(x, y, button);
+}
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button) {}

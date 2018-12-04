@@ -5,142 +5,145 @@
 #include "ofMain.h"
 
 class HecateThread : public ofThread {
- public:
-  ~HecateThread() {
-    stop();
-    waitForThread(false);
-  }
+  public:
+   ~HecateThread() {
+      stop();
+      waitForThread(false);
+   }
 
-  void hecateLog(string title, bool info) {
-    if (info) {
-      cout << logPrefix << title << endl;
-      cout << logPrefix << "Hecate: " << hecateBin.path() << endl;
-      cout << logPrefix << "File:   " << file.path() << endl;
-      cout << logPrefix << "Name:   " << file.getFileName() << endl;
-    }
-
-    else
-      cout << logPrefix << title << " [ " << file.getFileName() << " ]" << endl;
-  }
-
-  void setup(string hecatePath, string filePath) {
-    if (processing == false) {
-      path = filePath;
-      cmd = hecatePath + " -i " + path +
-          " --print_shot_info  --print_keyfrm_info";
-
-      ffcmd = "ffprobe -v quiet -print_format json -show_format -show_streams " + filePath;
-      file = ofFile(path);
-      hecateBin = ofFile(hecatePath);
-
-      if (hecateBin.doesFileExist(hecatePath)) {
-        hecateLog("INITIATED", true);
-        start();
+   void hecateLog(string title, bool info) {
+      if (info) {
+         cout << logPrefix << title << endl;
+         cout << logPrefix << "Hecate: " << hecateBin.path() << endl;
+         cout << logPrefix << "File:   " << file.path() << endl;
+         cout << logPrefix << "Name:   " << file.getFileName() << endl;
       }
-    }
-  }
 
-  void start() { startThread(); }
+      else
+         cout << logPrefix << title << " [ " << file.getFileName() << " ]" << endl;
+   }
 
-  void stop() {
-    if (processed == false && processing == true) {
-      system("killall hecate");
-      hecateLog("PROCESS KILLED", true);
-    }
+   void setup(string hecatePath, string filePath) {
+      if (processing == false) {
+         path = filePath;
+         cmd = hecatePath + " -i " + path +
+             " --print_shot_info  --print_keyfrm_info";
 
-    processing = false;
-    processed = false;
-    stopThread();
-    hecateLog("THREAD STOPPED", false);
-    std::unique_lock<std::mutex> lck(mutex);
-    condition.notify_all();
-  }
+         ffcmd = "ffprobe -v quiet -print_format json -show_format -show_streams " + filePath;
+         file = ofFile(path);
+         hecateBin = ofFile(hecatePath);
 
-  void threadedFunction() {
-    while (isThreadRunning()) {
-      if (!processing) {
-        std::unique_lock<std::mutex> lock(mutex);
-
-        processing = true;
-        string ffstr = ffprobe(ffcmd.c_str());
-        string hecstr = exec(cmd.c_str());
-        processing = false;
-        emitEvent(ffstr, hecstr);
-        processed = true;
-
-        condition.wait(lock);
+         if (hecateBin.doesFileExist(hecatePath)) {
+            hecateLog("INITIATED", true);
+            start();
+         }
       }
-    }
-  }
+   }
 
-  string ffprobe(const char* command) {
-    std::array<char, 256> buffer;
-    std::string result;
-    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command, "r"), pclose);
-    if (!pipe)
-      throw std::runtime_error("popen() failed!");
-    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
-      result += buffer.data();
+   void start() { startThread(); }
 
-    if (result != "") {
-      hecateLog("FFPROBE Analysis Complete", false);
-      return result;
-    } else
-      throw std::runtime_error("FFPROBE failed to execute");
-  }
+   void stop() {
+      if (processed == false && processing == true) {
+         system("killall hecate");
+         hecateLog("PROCESS KILLED", true);
+      }
 
-  string exec(const char* command) {
-    std::array<char, 128> buffer;
-    std::string result;
-    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command, "r"), pclose);
-    if (!pipe)
-      throw std::runtime_error("popen() failed!");
-    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
-      result += buffer.data();
+      processing = false;
+      processed = false;
+      stopThread();
+      hecateLog("THREAD STOPPED", false);
+      std::unique_lock<std::mutex> lck(mutex);
+      condition.notify_all();
+   }
 
-    if (result != "") {
-      hecateLog("Hecate Analysis Complete", false);
-      return result;
-    } else
-      throw std::runtime_error("HECATE failed to execute");
-  }
+   void threadedFunction() {
+      while (isThreadRunning()) {
+         if (!processing) {
+            std::unique_lock<std::mutex> lock(mutex);
 
-  void emitEvent(string ffstr, string hecstr) {
-    static HecateEvent newEvent;
-    newEvent.ffraw = ffstr;
-    newEvent.hecraw = hecstr;
-    newEvent.ffcmd = ffcmd;
-    newEvent.heccmd = cmd;
-    newEvent.path = path;
+            processing = true;
+            // string ffstr = ffprobe(ffcmd.c_str());
+            string ffstr = "";
+            string hecstr = exec(cmd.c_str());
+            processed = true;
 
-    ofNotifyEvent(HecateEvent::events, newEvent);
-  }
+            condition.wait(lock);
+         }
+      }
+   }
 
-  void update() {
-    std::unique_lock<std::mutex> lock(mutex);
-    // CODE
-    condition.notify_all();
-  }
+   // string ffprobe(const char* command) {
+   //    std::array<char, 256> buffer;
+   //    std::string result;
+   //    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command, "r"), pclose);
+   //    if (!pipe)
+   //       throw std::runtime_error("popen() failed!");
+   //    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
+   //       result += buffer.data();
 
-  void updateNoLock() {
-    // CODE
-    condition.notify_all();
-  }
+   //    if (result != "") {
+   //       hecateLog("FFPROBE Analysis Complete", false);
+   //       return result;
+   //    } else
+   //       throw std::runtime_error("FFPROBE failed to execute");
+   // }
 
-  void draw() {}
+   string exec(const char* command) {
+      std::array<char, 128> buffer;
+      std::string result;
+      std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command, "r"), pclose);
+      if (!pipe)
+         throw std::runtime_error("popen() failed!");
+      while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
+         result += buffer.data();
 
-  bool isProcessed() { return processed; }
+      processing = false;
 
- protected:
-  string cmd;
-  string ffcmd;
-  string path;
-  bool processing = false;
-  bool processed = false;
-  ofFile file;
-  ofFile hecateBin;
-  string logPrefix = "[VIDMAN ANALYSIS] ";
+      if (result != "") {
+         emitEvent(result);
+         hecateLog("Hecate Analysis Complete", false);
+         return result;
+      } else
+         throw std::runtime_error("HECATE failed to execute");
+   }
 
-  std::condition_variable condition;
-  int threadFrameNum = 0;
+   // void emitEvent(string ffstr, string hecstr) {
+   void emitEvent(string hecstr) {
+      static HecateEvent newEvent;
+      // newEvent.ffraw = ffstr;
+      newEvent.hecraw = hecstr;
+      newEvent.ffcmd = ffcmd;
+      newEvent.heccmd = cmd;
+      newEvent.path = path;
+
+      ofNotifyEvent(HecateEvent::events, newEvent);
+   }
+
+   void update() {
+      std::unique_lock<std::mutex> lock(mutex);
+      // CODE
+      condition.notify_all();
+   }
+
+   void updateNoLock() {
+      // CODE
+      condition.notify_all();
+   }
+
+   void draw() {}
+
+   bool isProcessed() { return processed; }
+
+  protected:
+   string cmd;
+   string ffcmd;
+   string path;
+   bool processing = false;
+   bool processed = false;
+   ofFile file;
+   ofFile hecateBin;
+   string logPrefix = "[VIDMAN ANALYSIS] ";
+
+   std::condition_variable condition;
+   int threadFrameNum = 0;
 };

@@ -11,6 +11,7 @@
         "latex"
     ],
     "files.associations": {
+        "*.make": "makefile",
         "iostream": "cpp",
         "bitset": "cpp",
         "typeinfo": "cpp",
@@ -64,7 +65,8 @@
         "type_traits": "cpp",
         "tuple": "cpp",
         "utility": "cpp",
-        "uri.h": "c"
+        "uri.h": "c",
+        "string": "cpp"
     },
     "C_Cpp.intelliSenseEngineFallback": "Disabled",
     "spellright.language": []

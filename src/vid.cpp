@@ -8,7 +8,7 @@ Vid::~Vid() {
 }
 
 void Vid::setup(string file, string* hecate) {
-  filePath   = file;
+  filePath = file;
   hecatePath = hecate;
 
   bool hecateOutputExists = prepareDataFolder(true);
@@ -38,12 +38,14 @@ void Vid::setup(string file, string* hecate) {
 }
 
 void Vid::setupCoordinates(int w, int h) {
-  width  = w;
+  width = w;
   height = h;
 }
 
 bool Vid::prepareDataFolder(bool readIfExists) {
-  baseName               = ofFilePath::getBaseName(filePath.get());
+  baseName = ofFilePath::getBaseName(filePath.get());
+  extension = ofFilePath::getFileExt(filePath.get());
+
   enclosingDirectoryPath = ofFilePath::getEnclosingDirectory(filePath.get(), false);
 
   vidmanDirectoryPath = ofFilePath::join(enclosingDirectoryPath, baseName + "_vidman");
@@ -52,7 +54,7 @@ bool Vid::prepareDataFolder(bool readIfExists) {
   rendersDirectoryPath = ofFilePath::join(vidmanDirectoryPath, "renders");
   rendersDirectoryPath = ofFilePath::getPathForDirectory(rendersDirectoryPath);
 
-  vidmanDirectory  = ofDirectory(vidmanDirectoryPath);
+  vidmanDirectory = ofDirectory(vidmanDirectoryPath);
   rendersDirectory = ofDirectory(rendersDirectoryPath);
 
   if (!vidmanDirectory.isDirectory()) {
@@ -65,8 +67,8 @@ bool Vid::prepareDataFolder(bool readIfExists) {
   }
 
   analysisSavedOutputPath = vidmanDirectoryPath + "analysis.json";
-  hecateSavedOutputPath   = vidmanDirectoryPath + ".hecateOutput.txt";
-  hecateSavedOutput       = ofFile(hecateSavedOutputPath, ofFile::ReadWrite, false);
+  hecateSavedOutputPath = vidmanDirectoryPath + ".hecateOutput.txt";
+  hecateSavedOutput = ofFile(hecateSavedOutputPath, ofFile::ReadWrite, false);
 
   if (hecateSavedOutput.exists()) {
     return true;
@@ -79,12 +81,12 @@ void Vid::processRendersFolder(bool hecateOutputExists) {
   vector<ofFile> renders = rendersDirectory.getFiles();
   if (hecateOutputExists && renders.size() > 0) {
     for (auto file : renders) {
-      string renderName    = ofFilePath::getBaseName(file.getAbsolutePath());
+      string renderName = ofFilePath::getBaseName(file.getAbsolutePath());
       vector<string> split = ofSplitString(renderName, "_");
       if (split.size() > 0) {
         string frameNumber = split[split.size() - 1];
         frameNumber.erase(0, min(frameNumber.find_first_not_of('0'), frameNumber.size() - 1));
-        int fnum        = stoi(frameNumber);
+        int fnum = stoi(frameNumber);
         bool isKeyframe = (keyframesMap.find(fnum) != keyframesMap.end());
         if (isKeyframe) {
           keyframesMap[fnum] = true;
@@ -103,7 +105,7 @@ void Vid::processRendersFolder(bool hecateOutputExists) {
 }
 
 void Vid::prepareHecateOutput() {
-  bool hecateOutputExists      = prepareDataFolder(true);
+  bool hecateOutputExists = prepareDataFolder(true);
   string hecateSavedOutputPath = hecateSavedOutput.path();
 
   if (hecateOutputExists) {
@@ -123,18 +125,18 @@ void Vid::openVideo() {
   video.loadAsync(filePath.get());
   video.setLoopState(OF_LOOP_NONE);
   video.stop();
-  inView        = true;
-  frameByframe  = false;
-  stats.closed  = false;
+  inView = true;
+  frameByframe = false;
+  stats.closed = false;
   stats.stopped = true;
 
   frameBuffer.allocate(500, 500, GL_RGB);
 }
 
 void Vid::closeVideo() {
-  inView        = false;
-  frameByframe  = false;
-  stats.closed  = true;
+  inView = false;
+  frameByframe = false;
+  stats.closed = true;
   stats.stopped = true;
   video.closeMovie();
 }
@@ -245,7 +247,7 @@ void Vid::nextKeyframe() {
   if (isReadyForKeyframeNavigation()) {
     prepareFrameByFrame();
 
-    int limit     = keyframes.size() - 1;
+    int limit = keyframes.size() - 1;
     int currFrame = video.getCurrentFrame();
 
     int temp = keyframeIndex;
@@ -400,16 +402,16 @@ void Vid::update() {
 }
 
 void Vid::calculateCoordinates(int w, int h, int& wn, int& hn, int& left, int& top) {
-  int wv   = stats.width;
-  int hv   = stats.height;
+  int wv = stats.width;
+  int hv = stats.height;
   float rv = wv / hv;
-  float r  = w / h;
+  float r = w / h;
 
   wn = r > rv ? (wv * h / hv) : (w);
   hn = r > rv ? (h) : (hv * w / wv);
 
   left = (ofGetWidth() - wn) / 2;
-  top  = (ofGetHeight() - hn) / 2;
+  top = (ofGetHeight() - hn) / 2;
 }
 
 void Vid::draw() {
@@ -421,18 +423,18 @@ void Vid::draw() {
     video.draw(left, top, wn, hn);
 
     if (video.isPlaying()) {
-      int currframe               = video.getCurrentFrame();
+      int currframe = video.getCurrentFrame();
       bool currentFrameIsKeyframe = (keyframesMap.find(currframe) != keyframesMap.end());
 
       float x, y, x2, fullW;
-      x     = tlo;
-      x2    = ofGetWidth() - tlo;
-      y     = ofGetHeight() - tlo - tlh;
+      x = tlo;
+      x2 = ofGetWidth() - tlo;
+      y = ofGetHeight() - tlo - tlh;
       fullW = ofGetWidth() - (tlo * 2);
 
       ofSetColor(150, 150, 150);
       for (auto key : shots) {
-        x  = ((float)get<0>(key) / (float)stats.frames) * fullW + tlo;
+        x = ((float)get<0>(key) / (float)stats.frames) * fullW + tlo;
         x2 = ((float)get<1>(key) / (float)stats.frames) * fullW + tlo;
         ofDrawRectangle(x, y + tlh / 5, x2 - x, tlh / 5 * 3);
       }
@@ -453,7 +455,7 @@ void Vid::draw() {
       }
       ofDisableAlphaBlending();
 
-      x  = tlo;
+      x = tlo;
       x2 = ofGetWidth() - tlo;
 
       ofSetHexColor(0x222222);
@@ -497,8 +499,6 @@ void Vid::draw() {
     }
   }
 }
-
-void Vid::keyPressed(ofKeyEventArgs& e) {}
 
 void Vid::keyPressed(int key) {
   if (key == 'h')
@@ -574,86 +574,69 @@ void Vid::hecateClose() {
 }
 
 void Vid::hecateEvent(HecateEvent& e) {
-  if (e.mode == "hecate") {
-    processHecateResults(e.raw);
-    prepareHecateOutput();
-
-    ofBuffer resultBuffer;
-    resultBuffer.set(e.raw.c_str(), e.raw.size());
-    hecateSavedOutput.writeFromBuffer(resultBuffer);
+  if (e.path == filePath.get()) {
+    processEvent(e);
   }
 }
 
-// void Vid::processHecateResults(string result) {
-//   // Remove Hecate header info
-//   vector<string> clean = ofSplitString(result, "shots:");
-//   clean                = ofSplitString(clean[1], "keyframes:");
+void Vid::processEvent(HecateEvent& e) {
+  json["info"]["baseName"] = baseName;
+  json["info"]["extension"] = extension;
+  json["info"]["enclosingDir"] = enclosingDirectoryPath;
+  json["info"]["vidmanDir"] = vidmanDirectoryPath;
+  json["info"]["rendersDir"] = rendersDirectoryPath;
 
-//   // Clean shots' brackets
-//   ofStringReplace(clean[0], "[", "");
-//   ofStringReplace(clean[0], "]", "");
-//   // Clean keyframes' brackets
-//   ofStringReplace(clean[1], "[", "");
-//   ofStringReplace(clean[1], "]", "");
+  ofxJSON ffprobe;
+  ffprobe.parse(e.ffraw);
+  float t1 = ffprobe["streams"][0]["width"].asInt();
+  float t2 = ffprobe["streams"][0]["height"].asInt();
+  string sampleRatio = ffprobe["streams"][0]["sample_aspect_ratio"].asString();
+  string displayRatio = ffprobe["streams"][0]["display_aspect_ratio"].asString();
+  string fps = ffprobe["streams"][0]["r_frame_rate"].asString();
+  string duration = ffprobe["streams"][0]["duration"].asString();
+  string frames = ffprobe["streams"][0]["nb_frames"].asString();
 
-//   vector<string> temp;
-//   vector<string> temp2;
-//   temp = ofSplitString(clean[0], ",");
-//   for (auto s : temp) {
-//     temp2 = ofSplitString(s, ":");
-//     shots.push_back(make_tuple(stoi(temp2[0]), stoi(temp2[1])));
-//   }
+  vector<string> t;
 
-//   // Prepare keyframes
-//   stringstream ssk(clean[1]);
+  json["width"] = t1;
+  json["height"] = t2;
 
-//   int i = 0;
-//   while (ssk >> i) {
-//     bool keyframeInShot = false;
+  t = ofSplitString(sampleRatio, ":");
+  t1 = stof(t[0]);
+  t2 = stof(t[1]);
+  json["sampleRatio"] = t1 / t2;
 
-//     int k = 0;
-//     for (auto s : shots) {
-//       if (i >= get<0>(s) && i <= get<1>(s)) {
-//         keyframeInShot         = true;
-//         keyframesToShotsMap[i] = k;
-//         break;
-//       }
-//       k++;
-//     }
+  t = ofSplitString(displayRatio, ":");
+  t1 = stof(t[0]);
+  t2 = stof(t[1]);
+  json["ratio"] = t1 / t2;
 
-//     if (keyframeInShot)
-//       keyframes.push_back(i);
+  t = ofSplitString(fps, "/");
+  t1 = stof(t[0]);
+  t2 = stof(t[1]);
+  json["fps"] = t1 / t2;
 
-//     if (ssk.peek() == ',' || ssk.peek() == ' ')
-//       ssk.ignore();
-//   }
+  json["duration"] = stof(duration);
+  json["frames"] = stof(frames);
 
-//   for (auto kf : keyframes)
-//     keyframesMap[kf] = false;
+  processHecateResults(e.hecraw);
+  prepareHecateOutput();
 
-//   hecateDone = true;
-// }
-
-void Vid::jsonFromHecate() {
-  // json["baseName"]     = baseName;
-  // json["enclosingDir"] = enclosingDirectoryPath;
-  // json["vidmanDir"]    = vidmanDirectoryPath;
-  // json["rendersDir"]   = enclosingDirectoryPath;
-
-  // ofxJSON js;
-  // for (auto keyframe : keyframesToShotsMap) {
-  // }
-  // Json::Value vect(Json::arrayValue);
+  ofBuffer resultBuffer;
+  resultBuffer.set(e.hecraw.c_str(), e.hecraw.size());
+  hecateSavedOutput.writeFromBuffer(resultBuffer);
+  json.save(analysisSavedOutputPath, true);
 }
 
 void Vid::processHecateResults(string result) {
-  json["baseName"]     = baseName;
-  json["enclosingDir"] = enclosingDirectoryPath;
-  json["vidmanDir"]    = vidmanDirectoryPath;
-  json["rendersDir"]   = enclosingDirectoryPath;
   // Remove Hecate header info
+  Json::Value jshots(Json::arrayValue);
+  json["shots"] = jshots;
+  Json::Value jkeyframes(Json::arrayValue);
+  json["keyframes"] = jshots;
+
   vector<string> clean = ofSplitString(result, "shots:");
-  clean                = ofSplitString(clean[1], "keyframes:");
+  clean = ofSplitString(clean[1], "keyframes:");
 
   // Clean shots' brackets
   ofStringReplace(clean[0], "[", "");
@@ -668,28 +651,68 @@ void Vid::processHecateResults(string result) {
   for (auto s : temp) {
     temp2 = ofSplitString(s, ":");
 
+    ofxJSON shot;
+    int start = stoi(temp2[0]);
+    int end = stoi(temp2[1]);
+    shot["start"] = start;
+    shot["end"] = end;
+    shot["frames"] = end - start;
+    shot["length"] = shot["frames"].asFloat() / json["fps"].asFloat();
+    Json::Value kfs(Json::arrayValue);
+    shot["keyframes"] = kfs;
+    shot["bestFrame"] = "NONE";
+    json["shots"].append(shot);
     shots.push_back(make_tuple(stoi(temp2[0]), stoi(temp2[1])));
+  }
+
+  for (auto s : json["shots"]) {
+    cout << s["start"].asString() + " " +
+            s["end"].asString() + " " + s["length"].asString()
+         << endl;
   }
 
   // Prepare keyframes
   stringstream ssk(clean[1]);
 
-  int i = 0;
-  while (ssk >> i) {
+  int key = 0;
+  while (ssk >> key) {
     bool keyframeInShot = false;
 
-    int k = 0;
+    int i = 0;
     for (auto s : shots) {
-      if (i >= get<0>(s) && i <= get<1>(s)) {
-        keyframeInShot         = true;
-        keyframesToShotsMap[i] = k;
+      float start = json["shots"][i]["start"].asFloat();
+      float end = json["shots"][i]["end"].asFloat();
+      float ideal = (end - start) / 2;
+
+      if (key >= get<0>(s) && key <= get<1>(s)) {
+        keyframeInShot = true;
+        keyframesToShotsMap[key] = i;
+        json["shots"][i]["keyframes"].append(key);
+
+        if (json["shots"][i]["bestFrame"] == "NONE")
+          json["shots"][i]["bestFrame"] = key;
+        else {
+          float currDist = ideal - (key - start);
+          currDist = abs(currDist);
+          float lastBest = json["shots"][i]["bestFrame"].asFloat();
+          float lasDist = ideal - (lastBest - start);
+          lasDist = abs(lasDist);
+
+          if (currDist < lasDist)
+            json["shots"][i]["bestFrame"] = key - start;
+        }
         break;
       }
-      k++;
+      i++;
     }
 
-    if (keyframeInShot)
-      keyframes.push_back(i);
+    if (keyframeInShot) {
+      keyframes.push_back(key);
+      ofxJSON jkey;
+      jkey["frame"] = key;
+      jkey["shot"] = i;
+      json["keyframes"].append(jkey);
+    }
 
     if (ssk.peek() == ',' || ssk.peek() == ' ')
       ssk.ignore();

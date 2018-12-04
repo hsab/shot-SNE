@@ -124,9 +124,9 @@ class VidJson {
                         break;
                      }
 
-                  if (alreadyRendered && findInArray((*json)["renderableKeyframes"], fnum))
+                  if (alreadyRendered && findInArray((*json)["renderableKeyframes"], fnum)) {
                      (*json)["renderedKeyframes"][fnum] = true;  // add when redering too00000000000000000
-                  else
+                  } else
                      ofFile::removeFile(file.getAbsolutePath(), false);
                }
             } else {
@@ -240,6 +240,9 @@ class VidJson {
       Json::Value jvalidkeyframes(Json::arrayValue);
       (*json)["renderableKeyframes"] = jvalidkeyframes;
 
+      Json::Value jredneredkeyframes(Json::arrayValue);
+      (*json)["renderedKeyframes"] = jredneredkeyframes;
+
       ofLogNotice("JSON prepared.");
    }
 
@@ -328,6 +331,10 @@ class VidJson {
          (*json)["renderableKeyframes"].append(bestFrame);
       }
 
+      for (auto key : (*json)["keyframes"]) {
+         (*json)["renderedKeyframes"][key.asInt()] = false;
+      }
+
       ofLogNotice("Renderable keyframes populated.");
    }
 
@@ -348,7 +355,7 @@ class VidJson {
    bool findInArray(const Json::Value& _json, int value) {
       assert(_json.isArray());
       for (int i = 0; i != _json.size(); i++)
-         if (json[i].asString() == to_string(value))
+         if (_json[i].asString() == to_string(value))
             return true;
 
       return false;
@@ -357,7 +364,7 @@ class VidJson {
    bool findInArray(const Json::Value& _json, float value) {
       assert(_json.isArray());
       for (int i = 0; i != _json.size(); i++)
-         if (json[i].asString() == to_string(value))
+         if (_json[i].asString() == to_string(value))
             return true;
 
       return false;

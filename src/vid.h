@@ -55,10 +55,10 @@ class Vid {
    ofGstVideoPlayer* player;
    VidStat stats;
 
-   vector<tuple<int, int>> shots;
-   vector<int> keyframes;
-   map<int, bool> keyframesMap;
-   map<int, int> keyframesToShotsMap;
+   //  vector<tuple<int, int>> shots;
+   //  vector<int> keyframes;
+   //  map<int, bool> keyframesMap;
+   //  map<int, int> keyframesToShotsMap;
 
    int keyframeIndex = -1;
 

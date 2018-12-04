@@ -157,12 +157,12 @@ void Vid::alignIndexToFrame(char flag) {
    if (curr == -1) {
       i = 0;
    } else {
-      for (i = 0; i < keyframes.size(); i++) {
-         if (keyframes[i] == curr) {
+      for (i = 0; i < json["keyframes"].size(); i++) {
+         if (json["keyframes"][i].asInt() == curr) {
             same = true;
             break;
          }
-         if (keyframes[i] > curr)
+         if (json["keyframes"][i].asInt() > curr)
             break;
       }
    }
@@ -189,7 +189,7 @@ void Vid::alignIndexToFrame(char flag) {
 bool Vid::isReadyForKeyframeNavigation() {
    bool a, b;
    a = frameByframe && !stats.closed && !stats.stopped && hecateDone;
-   b = !keyframes.empty() && !shots.empty();
+   b = !json["keyframes"].empty() && !json["shots"].empty();
 
    return (a && b);
 }
@@ -198,12 +198,12 @@ void Vid::nextKeyframe() {
    if (isReadyForKeyframeNavigation()) {
       prepareFrameByFrame();
 
-      int limit = keyframes.size() - 1;
+      int limit = json["keyframes"].size() - 1;
       int currFrame = video.getCurrentFrame();
 
       int temp = keyframeIndex;
-      for (int i = 0; i < keyframes.size(); i++) {
-         if (keyframes[i] > currFrame) {
+      for (int i = 0; i < json["keyframes"].size(); i++) {
+         if (json["keyframes"][i].asInt() > currFrame) {
             keyframeIndex = i;
             break;
          }
@@ -214,11 +214,10 @@ void Vid::nextKeyframe() {
       // } else {
       //   keyframeIndex = limit;
       // }
-      cout << stats.toString() << "Keyframe: " << keyframes[keyframeIndex]
-           << endl;
+      cout << stats.toString() << "Keyframe: " << json["keyframes"][keyframeIndex].asString() << endl;
 
       if (keyframeIndex != temp) {
-         video.setFrame(keyframes[keyframeIndex]);
+         video.setFrame(json["keyframes"][keyframeIndex].asInt());
          video.update();
       }
    } else {
@@ -241,23 +240,38 @@ void Vid::previousKeyframe() {
 
       int temp = keyframeIndex;
 
-      for (int i = keyframes.size() - 1; i >= 0; i--) {
-         if (keyframes[i] < currFrame) {
+      for (int i = json["keyframes"].size() - 1; i >= 0; i--) {
+         if (json["keyframes"][i].asInt() < currFrame) {
             keyframeIndex = i;
             break;
          }
       }
 
-      cout << stats.toString() << "Keyframe: " << keyframes[keyframeIndex]
-           << endl;
+      cout << stats.toString() << "Keyframe: " << json["keyframes"][keyframeIndex].asString() << endl;
 
       if (keyframeIndex != temp) {
-         video.setFrame(keyframes[keyframeIndex]);
+         video.setFrame(json["keyframes"][keyframeIndex].asInt());
       }
    } else {
       prepareFrameByFrame();
       alignIndexToFrame('p');
    }
+}
+
+void Vid::updateBuffer() {
+   bool keyframeExists = false;
+
+   if (video.getCurrentFrame() >= 0)
+      keyframeExists = json["renderedKeyframes"][video.getCurrentFrame()].asBool();
+   // for (auto key : json["renderedKeyframes"]) {
+   //    if (key.asInt() == video.getCurrentFrame()) {
+   //       keyframeExists = true;
+   //       break;
+   //    }
+   // }
+
+   if (keyframeExists)
+      prepareBuffer();
 }
 
 void Vid::prepareBuffer() {
@@ -276,13 +290,6 @@ void Vid::prepareBuffer() {
    contourFinder.setThreshold(threshold);
    contourFinder.findContours(saveImage);
    contourFinder.setFindHoles(false);
-}
-
-void Vid::updateBuffer() {
-   bool keyframeExists = (keyframesMap.find(video.getCurrentFrame()) != keyframesMap.end());
-   if (keyframeExists) {
-      prepareBuffer();
-   }
 }
 
 void Vid::renderCurrentFrame() {
@@ -317,16 +324,16 @@ void Vid::renderCurrentFrame() {
            video.getCurrentFrame());
    saveImage.setImageType(OF_IMAGE_COLOR);
    saveImage.save(filename);
-   keyframesMap[video.getCurrentFrame()] = true;
+   json["renderedKeyframes"][video.getCurrentFrame()] = true;
 }
 
 void Vid::renderKeyframes() {
-   if (hecateDone && !keyframes.empty() && !shots.empty()) {
+   if (hecateDone && !json["keyframes"].empty() && !json["shots"].empty()) {
       prepareFrameByFrame();
       video.firstFrame();
       video.setPaused(true);
-      for (auto i : keyframes) {
-         video.setFrame(i);
+      for (auto i : json["keyframes"]) {
+         video.setFrame(i.asInt());
          video.update();
          renderCurrentFrame();
       }
@@ -374,7 +381,16 @@ void Vid::draw() {
 
       if (video.isPlaying()) {
          int currframe = video.getCurrentFrame();
-         bool currentFrameIsKeyframe = (keyframesMap.find(currframe) != keyframesMap.end());
+
+         bool currentFrameIsKeyframe = false;
+         if (video.getCurrentFrame() >= 0)
+            currentFrameIsKeyframe = json["renderedKeyframes"][video.getCurrentFrame()].asBool();
+         // for (auto key : json["renderedKeyframes"]) {
+         //    if (key.asInt() == video.getCurrentFrame()) {
+         //       currentFrameIsKeyframe = true;
+         //       break;
+         //    }
+         // }
 
          float x, y, x2, fullW;
          x = tlo;
@@ -383,9 +399,9 @@ void Vid::draw() {
          fullW = ofGetWidth() - (tlo * 2);
 
          ofSetColor(150, 150, 150);
-         for (auto key : shots) {
-            x = ((float)get<0>(key) / (float)stats.frames) * fullW + tlo;
-            x2 = ((float)get<1>(key) / (float)stats.frames) * fullW + tlo;
+         for (auto shot : json["shots"]) {
+            x = ((float)shot["start"].asFloat() / (float)stats.frames) * fullW + tlo;
+            x2 = ((float)shot["end"].asFloat() / (float)stats.frames) * fullW + tlo;
             ofDrawRectangle(x, y + tlh / 5, x2 - x, tlh / 5 * 3);
          }
 
@@ -393,9 +409,10 @@ void Vid::draw() {
          ofSetColor(255, 255, 255, 150);
          ofSetLineWidth(1.0f);
 
-         for (auto key : keyframes) {
-            x = ((float)key / (float)stats.frames) * fullW + tlo;
-            if (keyframesMap[key]) {
+         for (auto key : json["keyframes"]) {
+            int temp = key.asInt();
+            x = ((float)temp / (float)stats.frames) * fullW + tlo;
+            if (json["renderedKeyframes"][temp].asBool()) {
                ofSetHexColor(0x00ff00);
                ofDrawLine(x, y - (tlo / 8), x, y + tlh + (tlo / 4));
                ofSetHexColor(0xffffff);
@@ -420,7 +437,7 @@ void Vid::draw() {
          ofDrawLine(x, y, x, y + tlh);
          ofSetHexColor(0xffffff);
 
-         string keyframeStr = (currentFrameIsKeyframe) ? "Keyframe: " + to_string(keyframes[keyframeIndex]) : "N/A";
+         string keyframeStr = (currentFrameIsKeyframe) ? "Keyframe: " + json["keyframes"][keyframeIndex].asString() : "N/A";
          char text[1024];
          sprintf(text,
                  "%s\n%d / %d\n%.2f / %.2fs\n%d / \%100\n%dx%d\n%d detected shots\n%d detected keyframes",
@@ -429,7 +446,7 @@ void Vid::draw() {
                  stats.currentTime, stats.duration,
                  (int)(stats.position * 100),
                  stats.width, stats.height,
-                 shots.size(), keyframes.size());
+                 json["shots"].size(), json["keyframes"].size());
          ofRectangle rect = verdana14.getStringBoundingBox(text, 0, 0);
          ofSetHexColor(0x222222);
          verdana14.drawString(text, tlo, y - tlo - rect.height - rect.y);

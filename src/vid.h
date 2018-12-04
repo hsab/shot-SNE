@@ -5,6 +5,7 @@
 #include "ofMain.h"
 #include "ofxCv.h"
 #include "ofxGui.h"
+#include "ofxJSON.h"
 
 struct VidStat {
   bool closed       = true;
@@ -137,6 +138,8 @@ class Vid {
   void setupCoordinates(int w, int h);
   void calculateCoordinates(int w, int h, int& wn, int& hn, int& left, int& top);
 
+  void saveJpg(string fileName, int quality);
+
   ofFbo frameBuffer;
   ofImage saveImage;
   ofxCv::ContourFinder contourFinder;
@@ -146,6 +149,12 @@ class Vid {
   string renderFolder;
 
   ofTrueTypeFont verdana14;
+
+  string hecateSavedOutputPath;
+
+  ofxJSON json;
+  string analysisSavedOutputPath;
+  void jsonFromHecate();
 
  private:
 };

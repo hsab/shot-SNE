@@ -6,6 +6,8 @@ class HecateEvent : public ofEventArgs {
   bool terminated = false;
   string path;
   string raw;
+  string ffraw;
+  string mode;
   string cmd;
   string clip;
   vector<tuple<int, int>> shots;

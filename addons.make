@@ -1,5 +1,6 @@
 
-ofxCv
 ofxOpenCv
+ofxCv
 ofxImGui
 ofxGui
+ofxJSON

@@ -13,7 +13,11 @@ void Vid::setup(string file, string* hecate) {
 
   bool hecateOutputExists = prepareDataFolder(true);
   if (hecateOutputExists) {
+    hecateSavedOutput.open(hecateSavedOutputPath, ofFile::ReadWrite, false);
     ofBuffer saved = hecateSavedOutput.readToBuffer();
+
+    json.clear();
+    json.open(analysisSavedOutputPath);
     processHecateResults(saved.getText());
   }
 
@@ -60,11 +64,11 @@ bool Vid::prepareDataFolder(bool readIfExists) {
     ofDirectory::createDirectory(rendersDirectoryPath, false);
   }
 
-  string hecateSavedOutputPath = vidmanDirectoryPath + ".hecateOutput.txt";
-  hecateSavedOutput            = ofFile(hecateSavedOutputPath, ofFile::ReadWrite, false);
+  analysisSavedOutputPath = vidmanDirectoryPath + "analysis.json";
+  hecateSavedOutputPath   = vidmanDirectoryPath + ".hecateOutput.txt";
+  hecateSavedOutput       = ofFile(hecateSavedOutputPath, ofFile::ReadWrite, false);
 
   if (hecateSavedOutput.exists()) {
-    hecateSavedOutput.open(hecateSavedOutputPath, ofFile::ReadWrite, false);
     return true;
   } else {
     return false;
@@ -124,7 +128,7 @@ void Vid::openVideo() {
   stats.closed  = false;
   stats.stopped = true;
 
-  frameBuffer.allocate(128, 128, GL_RGB);
+  frameBuffer.allocate(500, 500, GL_RGB);
 }
 
 void Vid::closeVideo() {
@@ -355,10 +359,11 @@ void Vid::renderCurrentFrame() {
 
   char filename[1024];
   sprintf(filename,
-          "%s/frame_%05d.png",
+          "%s/frame_%05d.jpeg",
           rendersDirectoryPath.c_str(),
           video.getCurrentFrame());
-  saveImage.saveImage(filename);
+  saveImage.setImageType(OF_IMAGE_COLOR);
+  saveImage.save(filename);
   keyframesMap[video.getCurrentFrame()] = true;
 }
 
@@ -569,18 +574,83 @@ void Vid::hecateClose() {
 }
 
 void Vid::hecateEvent(HecateEvent& e) {
-  // shots = e.shots;
-  // keyframes = e.keyframes;
-  processHecateResults(e.raw);
+  if (e.mode == "hecate") {
+    processHecateResults(e.raw);
+    prepareHecateOutput();
 
-  prepareHecateOutput();
+    ofBuffer resultBuffer;
+    resultBuffer.set(e.raw.c_str(), e.raw.size());
+    hecateSavedOutput.writeFromBuffer(resultBuffer);
+  }
+}
 
-  ofBuffer resultBuffer;
-  resultBuffer.set(e.raw.c_str(), e.raw.size());
-  hecateSavedOutput.writeFromBuffer(resultBuffer);
+// void Vid::processHecateResults(string result) {
+//   // Remove Hecate header info
+//   vector<string> clean = ofSplitString(result, "shots:");
+//   clean                = ofSplitString(clean[1], "keyframes:");
+
+//   // Clean shots' brackets
+//   ofStringReplace(clean[0], "[", "");
+//   ofStringReplace(clean[0], "]", "");
+//   // Clean keyframes' brackets
+//   ofStringReplace(clean[1], "[", "");
+//   ofStringReplace(clean[1], "]", "");
+
+//   vector<string> temp;
+//   vector<string> temp2;
+//   temp = ofSplitString(clean[0], ",");
+//   for (auto s : temp) {
+//     temp2 = ofSplitString(s, ":");
+//     shots.push_back(make_tuple(stoi(temp2[0]), stoi(temp2[1])));
+//   }
+
+//   // Prepare keyframes
+//   stringstream ssk(clean[1]);
+
+//   int i = 0;
+//   while (ssk >> i) {
+//     bool keyframeInShot = false;
+
+//     int k = 0;
+//     for (auto s : shots) {
+//       if (i >= get<0>(s) && i <= get<1>(s)) {
+//         keyframeInShot         = true;
+//         keyframesToShotsMap[i] = k;
+//         break;
+//       }
+//       k++;
+//     }
+
+//     if (keyframeInShot)
+//       keyframes.push_back(i);
+
+//     if (ssk.peek() == ',' || ssk.peek() == ' ')
+//       ssk.ignore();
+//   }
+
+//   for (auto kf : keyframes)
+//     keyframesMap[kf] = false;
+
+//   hecateDone = true;
+// }
+
+void Vid::jsonFromHecate() {
+  // json["baseName"]     = baseName;
+  // json["enclosingDir"] = enclosingDirectoryPath;
+  // json["vidmanDir"]    = vidmanDirectoryPath;
+  // json["rendersDir"]   = enclosingDirectoryPath;
+
+  // ofxJSON js;
+  // for (auto keyframe : keyframesToShotsMap) {
+  // }
+  // Json::Value vect(Json::arrayValue);
 }
 
 void Vid::processHecateResults(string result) {
+  json["baseName"]     = baseName;
+  json["enclosingDir"] = enclosingDirectoryPath;
+  json["vidmanDir"]    = vidmanDirectoryPath;
+  json["rendersDir"]   = enclosingDirectoryPath;
   // Remove Hecate header info
   vector<string> clean = ofSplitString(result, "shots:");
   clean                = ofSplitString(clean[1], "keyframes:");
@@ -597,6 +667,7 @@ void Vid::processHecateResults(string result) {
   temp = ofSplitString(clean[0], ",");
   for (auto s : temp) {
     temp2 = ofSplitString(s, ":");
+
     shots.push_back(make_tuple(stoi(temp2[0]), stoi(temp2[1])));
   }
 
@@ -620,24 +691,12 @@ void Vid::processHecateResults(string result) {
     if (keyframeInShot)
       keyframes.push_back(i);
 
-    if (ssk.peek() == ',' || ssk.peek() == ' ') {
+    if (ssk.peek() == ',' || ssk.peek() == ' ')
       ssk.ignore();
-    }
   }
 
-  for (auto kf : keyframes) {
+  for (auto kf : keyframes)
     keyframesMap[kf] = false;
-  }
 
   hecateDone = true;
-
-  cout << "Shots: {";
-  for (auto s : shots) {
-    cout << "[" << get<0>(s) << ":" << get<1>(s) << "], ";
-  }
-  cout << "}" << endl
-       << endl;
-
-  cout << "Keyframes: " + ofToString(keyframes) << endl
-       << endl;
 }

@@ -30,6 +30,8 @@ class HecateThread : public ofThread {
     if (processing == false) {
       cmd = hecatePath + " -i " + filePath +
           " --print_shot_info  --print_keyfrm_info";
+
+      ffcmd     = "ffprobe -v quiet -print_format json -show_format -show_streams" + filePath;
       file      = ofFile(filePath);
       hecateBin = ofFile(hecatePath);
 
@@ -63,11 +65,31 @@ class HecateThread : public ofThread {
 
         processing = true;
         exec(cmd.c_str());
+        ffprobe(ffcmd.c_str());
         processed = true;
 
         condition.wait(lock);
       }
     }
+  }
+
+  void ffprobe(const char* command) {
+    std::array<char, 128> buffer;
+    std::string result;
+    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command, "r"), pclose);
+    if (!pipe)
+      throw std::runtime_error("popen() failed!");
+    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
+      result += buffer.data();
+
+    processing = false;
+
+    if (result != "") {
+      emitFFprobeHecateEvent(result);
+      hecateLog("FFPROBE Analysis Complete", false);
+    }
+
+    // 24000/1001
   }
 
   void exec(const char* command) {
@@ -82,15 +104,25 @@ class HecateThread : public ofThread {
     processing = false;
 
     if (result != "") {
-      emitEvent(result);
+      emitHecateEvent(result);
       hecateLog("Hecate Analysis Complete", false);
     }
   }
 
-  void emitEvent(string result) {
+  void emitHecateEvent(string result) {
     static HecateEvent newEvent;
-    newEvent.raw = result;
-    newEvent.cmd = cmd;
+    newEvent.raw  = result;
+    newEvent.cmd  = cmd;
+    newEvent.mode = "hecate";
+
+    ofNotifyEvent(HecateEvent::events, newEvent);
+  }
+
+  void emitFFprobeHecateEvent(string result) {
+    static HecateEvent newEvent;
+    newEvent.ffraw = result;
+    newEvent.cmd   = ffcmd;
+    newEvent.mode  = "ffprobe";
 
     ofNotifyEvent(HecateEvent::events, newEvent);
   }
@@ -115,6 +147,7 @@ class HecateThread : public ofThread {
 
  protected:
   string cmd;
+  string ffcmd;
   bool processing = false;
   bool processed  = false;
   ofFile file;

@@ -1,19 +1,14 @@
 {
-    "C_Cpp.intelliSenseEngineFallback": "Enabled",
-    "files.exclude":{
+    "files.exclude": {
         "**/.readme": true,
         "**/.directory": true,
         "**/.appveyor.yml": true,
         "**/.gitignore": true,
         "**/.travis.yml": true
     },
-    "spellright.language": [
-        "English (American)"
-    ],
     "spellright.documentTypes": [
         "markdown",
-        "latex",
-        "plaintext"
+        "latex"
     ],
     "files.associations": {
         "iostream": "cpp",
@@ -68,6 +63,9 @@
         "cinttypes": "cpp",
         "type_traits": "cpp",
         "tuple": "cpp",
-        "utility": "cpp"
-    }
+        "utility": "cpp",
+        "uri.h": "c"
+    },
+    "C_Cpp.intelliSenseEngineFallback": "Disabled",
+    "spellright.language": []
 }

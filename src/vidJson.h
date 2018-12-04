@@ -22,25 +22,13 @@ struct VidDirectoryInfo {
 class VidJson {
   private:
    ofxJSON* json;
-   ofxJSON* renderedKeyframes;
-   ofxJSON initJson;
-   ofxJSON initRenderedKeyframes;
    string filePath;
    VidDirectoryInfo vd;
 
   public:
-   //    VidJson(ofxJSON& _json, string _filePath)
-
-   // VidJson()
-   //     : json(initJson), renderedKeyframes(initRenderedKeyframes) {}
-
-   // VidJson(ofxJSON& _json, ofxJSON& _renderedKeyframes, string _filepath)
-   //     : json(_json), renderedKeyframes(_renderedKeyframes), filePath(_filepath) {}
-
    VidJson& operator=(const VidJson& rhs) {
       if (this != &rhs) {
          json = rhs.json;
-         renderedKeyframes = rhs.renderedKeyframes;
          filePath = rhs.filePath;
          vd = rhs.vd;
       }
@@ -49,9 +37,8 @@ class VidJson {
 
    ~VidJson() {}
 
-   void setup(ofxJSON* _json, ofxJSON* _renderedKeyframes, string _filePath) {
+   void setup(ofxJSON* _json, string _filePath) {
       json = _json;
-      renderedKeyframes = _renderedKeyframes;
       filePath = _filePath;
    }
 
@@ -125,7 +112,7 @@ class VidJson {
                      }
 
                   if (alreadyRendered && findInArray((*json)["renderableKeyframes"], fnum)) {
-                     (*json)["renderedKeyframes"][fnum] = true;  // add when redering too00000000000000000
+                     (*json)["renderedKeyframes"][fnum] = 1;  // add when redering too00000000000000000
                   } else
                      ofFile::removeFile(file.getAbsolutePath(), false);
                }
@@ -195,7 +182,9 @@ class VidJson {
       // populateFFProbe(e.ffraw);
 
       processHecateResults(e.hecraw);
-      return prepareHecateOutput();
+      bool analysisSuccessful = prepareHecateOutput();
+      processRendersFolder(analysisSuccessful);
+      return analysisSuccessful;
    }
 
    bool prepareHecateOutput() {
@@ -239,9 +228,6 @@ class VidJson {
 
       Json::Value jvalidkeyframes(Json::arrayValue);
       (*json)["renderableKeyframes"] = jvalidkeyframes;
-
-      Json::Value jredneredkeyframes(Json::arrayValue);
-      (*json)["renderedKeyframes"] = jredneredkeyframes;
 
       ofLogNotice("JSON prepared.");
    }

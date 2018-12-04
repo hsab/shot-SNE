@@ -10,66 +10,63 @@
 
 class Vid {
   public:
+   Vid();
+   ~Vid();
+
    void setup(string file, string* hecate, int _w, int _h);
-   //   void setup(string file);
 
    void update();
    void draw();
+
    void hecate(string);
    void hecateClose();
+
    void closeVideo();
    void openVideo();
-   void vidStatVerbose();
-   void play();
-   void stop();
-   void pause();
-   void updateStats();
-   void initStats();
-   void setViewed(bool flag);
-   bool isViewed();
-   void alignIndexToFrame(char flag);
-   void nextKeyframe();
-   void previousKeyframe();
-   void prepareFrameByFrame();
-   void prepareBuffer();
-   void updateBuffer();
-   void renderCurrentFrame();
-   void renderKeyframes();
-   bool isReadyForKeyframeNavigation();
-   //  void processHecateResults(string result);
-   //  bool prepareDataFolder(bool readIfExists);
-   //  void processRendersFolder(bool hecateOutputExists);
-   //  void prepareHecateOutput();
-   string ffprobe(string filePath);
-   HecateThread* hecateThread = nullptr;
-
-   string* hecatePath;
-   ofParameter<string> filePath;
-   ofParameter<bool> inView;
-   ofParameter<bool> frameByframe;
-   ofParameter<bool> hecateDone;
-   ofParameter<int> currentFrame;
-   ofParameterGroup parameters;
 
    ofVideoPlayer video;
    ofGstVideoPlayer* player;
    VidStat stats;
 
-   //  vector<tuple<int, int>> shots;
-   //  vector<int> keyframes;
-   //  map<int, bool> keyframesMap;
-   //  map<int, int> keyframesToShotsMap;
+   void play();
+   void stop();
+   void pause();
+   bool isViewed();
+   void setViewed(bool flag);
+   void updateVidStats();
+   void initVidStats();
+
+   ofParameter<string> filePath;
+   ofParameter<bool> inView;
+   ofParameter<bool> frameByframe;
+   ofParameter<bool> hecateDone;
+   ofParameterGroup parameters;
 
    int keyframeIndex = -1;
 
-   void hecateEvent(HecateEvent& e);
-   //  void processEvent(HecateEvent& e);
+   bool isReadyForKeyframeNavigation();
+   void prepareFrameByFrame();
+   void alignIndexToFrame(char flag);
+   void nextKeyframe();
+   void previousKeyframe();
+
+   ofFbo frameBuffer;
+   ofImage saveImage;
+   ofxCv::ContourFinder contourFinder;
+
+   void prepareBuffer();
+   void updateBuffer();
+   void renderCurrentFrame();
+
+   string ffprobe(string filePath);
+
    void keyPressed(int key);
    void mouseDragged(int x, int y, int button);
    void windowResized();
+   void hecateEvent(HecateEvent& e);
 
-   Vid();
-   ~Vid();
+   HecateThread* hecateThread = nullptr;
+   string* hecatePath;
 
    int width;
    int height;
@@ -81,24 +78,14 @@ class Vid {
    void setupCoordinates(int w, int h);
    void calculateCoordinates(int w, int h, int& wn, int& hn, int& left, int& top);
 
-   void saveJpg(string fileName, int quality);
-
-   ofFbo frameBuffer;
-   ofImage saveImage;
-   ofxCv::ContourFinder contourFinder;
    ofxPanel gui;
    ofParameter<float> minArea, maxArea, threshold;
    ofParameter<bool> holes;
-   string renderFolder;
 
-   ofTrueTypeFont verdana14;
+   ofTrueTypeFont infoFont;
 
-   string hecateSavedOutputPath;
-
-   VidJson D;
+   VidJson vidData;
    ofxJSON json;
-   ofxJSON renderedKeyframes;
-   string analysisSavedOutputPath;
 
   private:
 };

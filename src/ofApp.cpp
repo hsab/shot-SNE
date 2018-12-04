@@ -6,14 +6,6 @@ void ofApp::setup() {
 
    dataPath = ofToDataPath("", true);
    hecatePath = ofToDataPath("", true) + "/bin/hecate";
-
-   std::shared_ptr<Vid> myvid(new Vid);
-   myvid->setup(dataPath + "/foo.mp4", &hecatePath, 900, 900);
-   videos.push_back(myvid);
-
-   std::shared_ptr<Vid> myvid2(new Vid);
-   myvid2->setup(dataPath + "/foo2.mp4", &hecatePath, 900, 900);
-   videos.push_back(myvid2);
 }
 
 void ofApp::exit() {}
@@ -26,13 +18,17 @@ void ofApp::update() {
    strm << "fps: " << ofGetFrameRate();
    ofSetWindowTitle(strm.str());
 
-   videos[videoIndex]->update();
+   if (videos.size() > 0) {
+      videos[videoIndex]->update();
+   }
 }
 
 //--------------------------------------------------------------
 void ofApp::draw() {
    // videos[videoIndex]video.draw(0, 0);
-   videos[videoIndex]->draw();
+   if (videos.size() > 0) {
+      videos[videoIndex]->draw();
+   }
 }
 
 //--------------------------------------------------------------
@@ -41,9 +37,12 @@ void ofApp::keyPressed(int key) {
    if (val >= 0 && val < videos.size()) {
       videos[videoIndex]->closeVideo();
       videoIndex = val;
+      videos[videoIndex]->openVideo();
    }
 
-   videos[videoIndex]->keyPressed(key);
+   if (videos.size() > 0) {
+      videos[videoIndex]->keyPressed(key);
+   }
 }
 
 //--------------------------------------------------------------
@@ -54,7 +53,9 @@ void ofApp::mouseMoved(int x, int y) {}
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button) {
-   videos[videoIndex]->mouseDragged(x, y, button);
+   if (videos.size() > 0) {
+      videos[videoIndex]->mouseDragged(x, y, button);
+   }
 }
 
 //--------------------------------------------------------------
@@ -71,11 +72,21 @@ void ofApp::mouseExited(int x, int y) {}
 
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h) {
-   videos[videoIndex]->windowResized();
+   if (videos.size() > 0) {
+      videos[videoIndex]->windowResized();
+   }
 }
 
 //--------------------------------------------------------------
 void ofApp::gotMessage(ofMessage msg) {}
 
 //--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo) {}
+void ofApp::dragEvent(ofDragInfo info) {
+   if (info.files.size() > 0) {
+      for (unsigned int k = 0; k < info.files.size(); k++) {
+         std::shared_ptr<Vid> myvid(new Vid);
+         myvid->setup(info.files[k], &hecatePath, 900, 900);
+         videos.push_back(myvid);
+      }
+   }
+}

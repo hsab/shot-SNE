@@ -1,6 +1,8 @@
 
 ofxOpenCv
 ofxCv
-# ofxImGui
+ofxImGui
 ofxGui
 ofxJSON
+ofxPreset
+ofxXmlSettings

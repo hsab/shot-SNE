@@ -1,0 +1,16 @@
+<settings>
+    <Display_Width>900</Display_Width>
+    <Display_Height>900</Display_Height>
+    <Background>0.151672, 0.35993, 0.429348, 1</Background>
+</settings>
+<videos>
+    <video>
+        <filePath>/home/hirad/Desktop/videos/foo.mp4</filePath>
+    </video>
+    <video>
+        <filePath>/home/hirad/Desktop/videos/foo2.mp4</filePath>
+    </video>
+    <video>
+        <filePath>/home/hirad/Desktop/videos/haneke.mp4</filePath>
+    </video>
+</videos>

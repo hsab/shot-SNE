@@ -13,10 +13,13 @@ void Vid::setup(string file, string* hecate, int _w, int _h) {
 
    // setup viddata
    vidData.setup(&json, file);
-   bool analysisExists = vidData.detectExistingData();
+   hecateDone = vidData.detectExistingData();
 
-   string ffstr = ffprobe(file);
-   vidData.populateFFProbe(ffstr);
+   if (!hecateDone) {
+      string ffstr = ffprobe(file);
+      vidData.populateFFProbe(ffstr);
+   }
+
    initVidStats();
    setupCoordinates(_w, _h);
    calculateCoordinates(width, height, wn, hn, left, top);
@@ -27,11 +30,11 @@ void Vid::setup(string file, string* hecate, int _w, int _h) {
    infoFont.setLineHeight(18.0f);
    infoFont.setLetterSpacing(1.037);
 
-   gui.setup();
-   gui.add(minArea.set("Min area", 0, 1, 5000));
-   gui.add(maxArea.set("Max area", 5000, 1, 5000));
-   gui.add(threshold.set("Threshold", 0, 0, 255));
-   gui.add(holes.set("Holes", true));
+   // gui.setup();
+   parameters.add(minArea.set("Min area", 0, 1, 5000));
+   parameters.add(maxArea.set("Max area", 5000, 1, 5000));
+   parameters.add(threshold.set("Threshold", 0, 0, 255));
+   parameters.add(showContour.set("Show", true));
 }
 
 string Vid::ffprobe(string filePath) {
@@ -325,8 +328,6 @@ void Vid::calculateCoordinates(int w, int h, int& wn, int& hn, int& left, int& t
 
 void Vid::draw() {
    if (inView) {
-      gui.draw();
-
       ofSetHexColor(0xffffff);
 
       video.draw(left, top, wn, hn);
@@ -398,7 +399,7 @@ void Vid::draw() {
          infoFont.drawString(text, tlo, y - tlo - rect.height - rect.y);
 
          // if (contourFinder.size() > 0 && video.isPaused() && holes && currentFrameIsKeyframe && keyframesMap[currframe]) {
-         if (contourFinder.size() > 0 && holes && currentFrameIsKeyframe) {
+         if (contourFinder.size() > 0 && showContour && currentFrameIsKeyframe) {
             ofEnableAlphaBlending();
             ofSetColor(255, 0, 0, 150);
             ofTranslate(left, top);
@@ -410,6 +411,23 @@ void Vid::draw() {
             ofSetHexColor(0xffffff);
          }
       }
+   }
+}
+
+void Vid::drawGui() {
+   if (inView) {
+      ImGui::SetNextWindowPos(ImVec2(ofGetWidth() - 20 - 350, 20), ImGuiCond_Always);
+      ImGui::SetNextWindowSize(ImVec2(350, 0.0f), ImGuiCond_Always);
+      ImGui::Begin("Contour Settings", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+      {
+         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+         ofxPreset::Gui::AddParameter(minArea);
+         ofxPreset::Gui::AddParameter(maxArea);
+         ofxPreset::Gui::AddParameter(threshold);
+         ofxPreset::Gui::AddParameter(showContour);
+         //this will change the app background color
+      }
+      ImGui::End();
    }
 }
 
@@ -485,4 +503,8 @@ void Vid::hecateEvent(HecateEvent& e) {
       if (!hecateDone)
          ofLogError("FAILED TO SAVE FILE");
    }
+}
+
+ofxJSON Vid::data() {
+   return json;
 }

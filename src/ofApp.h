@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 // #include "ofxImGui.h"
+#include "guiMain.h"
 #include "vid.h"
 
 class ofApp : public ofBaseApp {
@@ -24,8 +25,19 @@ class ofApp : public ofBaseApp {
    void gotMessage(ofMessage msg);
 
    // Vid myvid;
+   //  ofxImGui::Gui gui;
+   //  ImVec4 backgroundColor;
+   VidmanGui gui;
+   bool mouseOverGui = false;
+
+   std::vector<std::string> fileNames;
    vector<std::shared_ptr<Vid>> videos;
-   int videoIndex = 0;
+   std::shared_ptr<Vid> activeVid = nullptr;
+   static int selected;
+
+   bool videoAvailable();
+   void ShowHelpMarker(const char* desc);
+
    bool doLock;
    string hecatePath;
    string dataPath;

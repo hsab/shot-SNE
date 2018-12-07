@@ -79,6 +79,7 @@ class Vid {
    int tlo = 20;
 
    void setupCoordinates(int w, int h);
+   void refreshCoordinates(int w, int h);
    void calculateCoordinates(int w, int h, int& wn, int& hn, int& left, int& top);
 
    //  ofxPanel gui;

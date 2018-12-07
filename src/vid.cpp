@@ -58,6 +58,11 @@ void Vid::setupCoordinates(int w, int h) {
    height = h;
 }
 
+void Vid::refreshCoordinates(int w, int h) {
+   setupCoordinates(w, h);
+   calculateCoordinates(width, height, wn, hn, left, top);
+}
+
 void Vid::openVideo() {
    calculateCoordinates(width, height, wn, hn, left, top);
 
@@ -198,7 +203,7 @@ void Vid::nextKeyframe() {
          }
       }
 
-      cout << stats.toString() << "Keyframe: " << json["keyframes"][keyframeIndex].asString() << endl;
+      // cout << stats.toString() << "Keyframe: " << json["keyframes"][keyframeIndex].asString() << endl;
 
       if (keyframeIndex != temp) {
          video.setFrame(json["keyframes"][keyframeIndex].asInt());
@@ -384,19 +389,19 @@ void Vid::draw() {
          ofDrawLine(x, y, x, y + tlh);
          ofSetHexColor(0xffffff);
 
-         string keyframeStr = (currentFrameIsKeyframe) ? "Keyframe: " + json["keyframes"][keyframeIndex].asString() : "N/A";
-         char text[1024];
-         sprintf(text,
-                 "%s\n%d / %d\n%.2f / %.2fs\n%d / \%100\n%dx%d\n%d detected shots\n%d detected keyframes",
-                 keyframeStr.c_str(),
-                 currframe, stats.frames,
-                 stats.currentTime, stats.duration,
-                 (int)(stats.position * 100),
-                 stats.width, stats.height,
-                 json["shots"].size(), json["keyframes"].size());
-         ofRectangle rect = infoFont.getStringBoundingBox(text, 0, 0);
-         ofSetHexColor(0x222222);
-         infoFont.drawString(text, tlo, y - tlo - rect.height - rect.y);
+         // string keyframeStr = (currentFrameIsKeyframe) ? "Keyframe: " + json["keyframes"][keyframeIndex].asString() : "N/A";
+         // char text[1024];
+         // sprintf(text,
+         //         "%s\n%d / %d\n%.2f / %.2fs\n%d / \%100\n%dx%d\n%d detected shots\n%d detected keyframes",
+         //         keyframeStr.c_str(),
+         //         currframe, stats.frames,
+         //         stats.currentTime, stats.duration,
+         //         (int)(stats.position * 100),
+         //         stats.width, stats.height,
+         //         json["shots"].size(), json["keyframes"].size());
+         // ofRectangle rect = infoFont.getStringBoundingBox(text, 0, 0);
+         // ofSetHexColor(0x222222);
+         // infoFont.drawString(text, tlo, y - tlo - rect.height - rect.y);
 
          // if (contourFinder.size() > 0 && video.isPaused() && holes && currentFrameIsKeyframe && keyframesMap[currframe]) {
          if (contourFinder.size() > 0 && showContour && currentFrameIsKeyframe) {
@@ -418,13 +423,34 @@ void Vid::drawGui() {
    if (inView) {
       ImGui::SetNextWindowPos(ImVec2(ofGetWidth() - 20 - 350, 20), ImGuiCond_Always);
       ImGui::SetNextWindowSize(ImVec2(350, 0.0f), ImGuiCond_Always);
-      ImGui::Begin("Contour Settings", NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+      string windowName = json["info"]["baseName"].asString() + "." + json["info"]["extension"].asString() + " Settings";
+      ImGui::Begin(windowName.c_str(), NULL, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
       {
-         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-         ofxPreset::Gui::AddParameter(minArea);
-         ofxPreset::Gui::AddParameter(maxArea);
-         ofxPreset::Gui::AddParameter(threshold);
-         ofxPreset::Gui::AddParameter(showContour);
+         if (ImGui::CollapsingHeader("Info")) {
+            int currframe = video.getCurrentFrame();
+            bool currentFrameIsKeyframe = false;
+            if (video.getCurrentFrame() >= 0)
+               currentFrameIsKeyframe = json["renderedKeyframes"][video.getCurrentFrame()].asBool();
+            string keyframeStr = (currentFrameIsKeyframe) ? "Keyframe: " + json["keyframes"][keyframeIndex].asString() : "N/A";
+
+            char text[1024];
+            sprintf(text,
+                    "%s\n%d / %d\n%.2f / %.2fs\n%d / \%100\n%dx%d\n%d detected shots\n%d detected keyframes",
+                    keyframeStr.c_str(),
+                    currframe, stats.frames,
+                    stats.currentTime, stats.duration,
+                    (int)(stats.position * 100),
+                    stats.width, stats.height,
+                    json["shots"].size(), json["keyframes"].size());
+            ImGui::Text(text);
+         }
+         if (ImGui::CollapsingHeader("Contour Settings")) {
+            ofxPreset::Gui::AddParameter(minArea);
+            ofxPreset::Gui::AddParameter(maxArea);
+            ofxPreset::Gui::AddParameter(threshold);
+            ofxPreset::Gui::AddParameter(showContour);
+         }
+
          //this will change the app background color
       }
       ImGui::End();

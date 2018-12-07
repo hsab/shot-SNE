@@ -253,11 +253,11 @@ class VidJson {
          //   shots.push_back(make_tuple(stoi(temp2[0]), stoi(temp2[1])));
       }
 
-      for (auto s : (*json)["shots"]) {
-         cout << s["start"].asString() + " " +
-                 s["end"].asString() + " " + s["length"].asString()
-              << endl;
-      }
+      // for (auto s : (*json)["shots"]) {
+      //    cout << s["start"].asString() + " " +
+      //            s["end"].asString() + " " + s["length"].asString()
+      //         << endl;
+      // }
 
       ofLogNotice("Shots populated.");
    }

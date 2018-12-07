@@ -4,6 +4,7 @@ int ofApp::selected = -1;
 
 //--------------------------------------------------------------
 void ofApp::setup() {
+   ofSetWindowTitle("VIDMAN");
    // ofSetLogLevel(OF_LOG_VERBOSE);
 
    // gui.setup();
@@ -29,10 +30,6 @@ void ofApp::exit() {}
 
 //--------------------------------------------------------------
 void ofApp::update() {
-   std::stringstream strm;
-   strm << "fps: " << ofGetFrameRate();
-   ofSetWindowTitle(strm.str());
-
    if (videoAvailable()) {
       videos[selected]->update();
    }
@@ -53,18 +50,10 @@ void ofApp::draw() {
    }
 
    gui.end();
-   cout << mouseOverGui << endl;
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key) {
-   int val = key - '0';
-   if (val >= 0 && val < videos.size()) {
-      videos[selected]->closeVideo();
-      selected = val;
-      videos[selected]->openVideo();
-   }
-
    if (videoAvailable() && !mouseOverGui) {
       videos[selected]->keyPressed(key);
    }
@@ -78,8 +67,10 @@ void ofApp::mouseMoved(int x, int y) {}
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button) {
-   if (videoAvailable() && !mouseOverGui) {
-      videos[selected]->mouseDragged(x, y, button);
+   if (videoAvailable()) {
+      int safeZone = ofGetHeight() - videos[selected]->tlh - (videos[selected]->tlo) * 2;
+      if (y > safeZone)
+         videos[selected]->mouseDragged(x, y, button);
    }
 }
 

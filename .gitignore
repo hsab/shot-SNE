@@ -7,6 +7,9 @@
 /obj
 /.vscode/browse.db
 /.vscode/browse.db*
+!/hecate/bin/
+!/hecate/lib/
+!/hecate/lib/*
 
 # Xcode Project
 xcuserdata/

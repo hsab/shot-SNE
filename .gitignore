@@ -9,8 +9,6 @@
 /.vscode/browse.db*
 !/hecate/bin/
 !/hecate/lib/
-!/hecate/lib/libhecate.a
-!/hecate/lib/libhecate.so
 
 
 # Xcode Project
@@ -71,3 +69,6 @@ DerivedData
 *.db-shm
 *.db-wal
 *.directory
+
+!/hecate/lib/libhecate.a
+!/hecate/lib/libhecate.so

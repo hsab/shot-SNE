@@ -1,5 +1,5 @@
 # shot-SNE
-### Renarrativization of Moving Images Based on Visual Similarity Through the Application of t-SNE and Shot Boundary Detection
+### Renarrativization of moving images based on visual similarity through the application of t-SNE and shot boundary detection
 
 Made with openFrameworks.
 Requires:
